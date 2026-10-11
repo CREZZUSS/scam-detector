@@ -11,6 +11,9 @@ export const PAGE_HTML = `<!doctype html>
 <title data-i18n="title">Détecteur d'arnaques en ligne | CREZZUSS</title>
 <meta name="description" content="Collez le lien d'un site qui promet des gains : l'outil lit ses signaux publics et rend un avis. Gratuit, sans inscription." />
 <meta name="theme-color" content="#f7f8fb" />
+<link rel="icon" type="image/svg+xml" href="/logos/logo.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="/logos/favicon-32.png" />
+<link rel="apple-touch-icon" href="/logos/favicon-180.png" />
 <style>
   :root {
     color-scheme: light;
@@ -126,7 +129,7 @@ export const PAGE_HTML = `<!doctype html>
 
 <header>
   <div class="wrap">
-    <a class="brand" href="/"><span data-i18n="brandName">Détecteur d'arnaques</span> <span data-i18n="by">par CREZZUSS</span></a>
+    <a class="brand" href="/"><img src="/logos/logo.svg" alt="" width="26" height="26" style="vertical-align:-6px;margin-right:8px" /><span data-i18n="brandName">Détecteur d'arnaques</span> <span data-i18n="by">par CREZZUSS</span></a>
     <div class="lang" role="group" aria-label="Langue / Language">
       <button type="button" data-lang="fr">FR</button>
       <button type="button" data-lang="en">EN</button>

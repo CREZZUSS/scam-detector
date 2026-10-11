@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Détecteur d'arnaques">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4f78ff"/>
+      <stop offset="1" stop-color="#2f5bff"/>
+    </linearGradient>
+  </defs>
+  <!-- Loupe : lentille en forme de bouclier (inspecter + protéger) -->
+  <path d="M19 5 L31 9 V20 C31 27.5 26.2 32.4 19 35 C11.8 32.4 7 27.5 7 20 V9 Z"
+        fill="url(#g)"/>
+  <path d="M19 5 L31 9 V20 C31 27.5 26.2 32.4 19 35 C11.8 32.4 7 27.5 7 20 V9 Z"
+        fill="none" stroke="#1e3fb8" stroke-width="1.5" opacity=".35"/>
+  <!-- Coche de validation dans le bouclier -->
+  <path d="M13.5 19.5 L17.5 23.5 L25 14.5" fill="none" stroke="#fff" stroke-width="3.2"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Manche de la loupe -->
+  <line x1="29" y1="30" x2="41" y2="42" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+  <line x1="29" y1="30" x2="41" y2="42" stroke="#2f5bff" stroke-width="2.4" stroke-linecap="round"/>
+</svg>

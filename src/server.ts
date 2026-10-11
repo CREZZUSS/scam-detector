@@ -19,9 +19,13 @@ const scanLimiter = new RateLimiter({
   windowMs: Number(process.env.RATE_WINDOW_MS ?? 10 * 60 * 1000),
 });
 
-/** Logos de la bande defilante : liste fermee, servis depuis public/logos (dist/src -> ../../public). */
+/** Logos, logo du site et favicons : liste fermee, servis depuis public/logos (dist/src -> ../../public). */
 const LOGOS_DIR = new URL("../../public/logos/", import.meta.url);
-const LOGO_FILES = new Set(["ecard.png", "crezzuss.png", "wintg.png", "tchin.png"]);
+const LOGO_FILES = new Set([
+  "ecard.png", "crezzuss.png", "wintg.png", "tchin.png",
+  "logo.svg", "favicon-32.png", "favicon-180.png", "favicon-512.png",
+]);
+const CONTENT_TYPE: Record<string, string> = { ".png": "image/png", ".svg": "image/svg+xml" };
 
 function isPrivateTarget(url: string): boolean {
   let host: string;
@@ -57,8 +61,9 @@ export function createApp() {
       }
       try {
         const data = await readFile(new URL(name, LOGOS_DIR));
+        const ext = name.slice(name.lastIndexOf("."));
         res.writeHead(200, {
-          "content-type": "image/png",
+          "content-type": CONTENT_TYPE[ext] ?? "application/octet-stream",
           "cache-control": "public, max-age=604800",
           "x-content-type-options": "nosniff",
         }).end(data);
