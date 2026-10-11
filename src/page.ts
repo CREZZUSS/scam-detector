@@ -95,13 +95,6 @@ export const PAGE_HTML = `<!doctype html>
   .track img { height:38px; width:auto; display:block; opacity:.9; }
   @keyframes marquee { to { transform:translateX(-50%) } }
 
-  /* Signes */
-  .signs { margin:56px 0 0; }
-  .signs h2 { font-size:1.35rem; margin:0 0 14px; }
-  .signs ol { margin:0; padding-left:22px; color:var(--mut); }
-  .signs li { margin-bottom:6px; }
-  .signs li strong { color:var(--ink); }
-
   .cta { margin:48px 0 0; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px;
     display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
   .cta p { margin:0; color:var(--mut); }
@@ -161,18 +154,6 @@ export const PAGE_HTML = `<!doctype html>
     </div>
   </section>
 
-  <section class="signs">
-    <h2>Les 7 signes d'une arnaque aux gains</h2>
-    <ol>
-      <li><strong>Un bonus à l'inscription</strong>, pour vous pousser à déposer ou à inviter.</li>
-      <li><strong>Des gains par le parrainage</strong> : ce sont vos proches qui paieront.</li>
-      <li><strong>Déposer pour débloquer</strong> des gains ou des paliers « VIP ».</li>
-      <li><strong>Un rendement garanti</strong> : aucun placement honnête ne le promet.</li>
-      <li><strong>Un site tout neuf</strong>, souvent en .top ou .xyz.</li>
-      <li><strong>Personne de responsable</strong> : ni société, ni adresse, ni RCCM.</li>
-      <li><strong>Aucun agrément BCEAO</strong> : vérifiez sur bceao.int.</li>
-    </ol>
-  </section>
 
   <div class="cta">
     <p><strong>Besoin de sécuriser votre site ou vos paiements&nbsp;?</strong><br>CREZZUSS, agence numérique à Lomé.</p>
