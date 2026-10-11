@@ -139,8 +139,8 @@ export const PAGE_HTML = `<!doctype html>
 
 <main class="wrap">
   <div class="hero">
-    <h1 data-i18n="h1">Ce site est-il une arnaque&nbsp;?</h1>
-    <p data-i18n="sub">Collez le lien d'un site qui promet de l'argent. On lit ses signaux publics et on vous donne un avis en quelques secondes.</p>
+    <h1 data-i18n="h1">Ne vous faites pas arnaquer en ligne</h1>
+    <p data-i18n="sub">Un site vous promet de l'argent facile&nbsp;? Collez son lien&nbsp;: en quelques secondes, on repère pour vous les signes d'une arnaque.</p>
   </div>
 
   <form id="f">
@@ -148,7 +148,7 @@ export const PAGE_HTML = `<!doctype html>
     <input id="u" type="text" inputmode="url" autocomplete="off" required />
     <button id="b" type="submit" data-i18n="analyze">Analyser</button>
   </form>
-  <p class="hint" data-i18n="hint">Gratuit, sans inscription. Aucun lien n'est conservé.</p>
+  <p class="hint" data-i18n="hint">100&nbsp;% gratuit, sans inscription. On ne garde aucun lien.</p>
 
   <div id="out" aria-live="polite"></div>
 
@@ -186,13 +186,13 @@ export const PAGE_HTML = `<!doctype html>
     title:   { fr:"Détecteur d'arnaques en ligne | CREZZUSS", en:"Online Scam Detector | CREZZUSS" },
     brandName:{ fr:"Détecteur d'arnaques", en:"Scam Detector" },
     by:      { fr:"par CREZZUSS", en:"by CREZZUSS" },
-    h1:      { fr:"Ce site est-il une arnaque\\u00a0?", en:"Is this site a scam?" },
-    sub:     { fr:"Collez le lien d'un site qui promet de l'argent. On lit ses signaux publics et on vous donne un avis en quelques secondes.", en:"Paste the link of a site that promises money. We read its public signals and give you a verdict in seconds." },
+    h1:      { fr:"Ne vous faites pas arnaquer en ligne", en:"Don't get scammed online" },
+    sub:     { fr:"Un site vous promet de l'argent facile\\u00a0? Collez son lien\\u00a0: en quelques secondes, on repère pour vous les signes d'une arnaque.", en:"A site promises you easy money? Paste its link: in seconds, we spot the signs of a scam for you." },
     label:   { fr:"Lien du site à vérifier", en:"Link of the site to check" },
     place:   { fr:"Collez un lien, ex. gains-rapides.top", en:"Paste a link, e.g. quick-cash.top" },
     analyze: { fr:"Analyser", en:"Analyze" },
     analyzing:{ fr:"Analyse…", en:"Analyzing…" },
-    hint:    { fr:"Gratuit, sans inscription. Aucun lien n'est conservé.", en:"Free, no sign-up. No link is stored." },
+    hint:    { fr:"100\\u00a0% gratuit, sans inscription. On ne garde aucun lien.", en:"100% free, no sign-up. We keep no link." },
     partners:{ fr:"Nos produits et partenaires", en:"Our products and partners" },
     ctaTitle:{ fr:"Besoin de sécuriser votre site ou vos paiements\\u00a0?", en:"Need to secure your website or payments?" },
     ctaSub:  { fr:"CREZZUSS, agence numérique à Lomé.", en:"CREZZUSS, digital agency in Lomé." },
@@ -207,10 +207,10 @@ export const PAGE_HTML = `<!doctype html>
     fail:    { fr:"Impossible de joindre le service. Réessayez dans un instant.", en:"Could not reach the service. Please try again shortly." }
   };
   var VERDICT = {
-    danger:   { fr:["Danger","r-danger","Plusieurs signaux d'arnaque. Ne versez pas d'argent."], en:["Danger","r-danger","Several scam signals. Do not send any money."] },
-    suspect:  { fr:["Suspect","r-suspect","Des signaux inquiétants. Vérifiez avant tout versement."], en:["Suspicious","r-suspect","Worrying signals. Check before paying anything."] },
-    prudence: { fr:["Prudence","r-prudence","Quelques signaux à surveiller."], en:["Caution","r-prudence","A few signals to watch."] },
-    aucun_signal_fort:{ fr:["Aucun signal fort","r-ok","Rien d'alarmant détecté, restez prudent."], en:["No strong signal","r-ok","Nothing alarming found, stay careful."] }
+    danger:   { fr:["Danger","r-danger","Ce site montre plusieurs signes d'arnaque. N'envoyez pas d'argent."], en:["Danger","r-danger","This site shows several scam signs. Do not send any money."] },
+    suspect:  { fr:["Suspect","r-suspect","Ce site montre des signes inquiétants. Vérifiez avant de payer."], en:["Suspicious","r-suspect","This site shows worrying signs. Check before you pay."] },
+    prudence: { fr:["Prudence","r-prudence","Quelques signes à surveiller sur ce site."], en:["Caution","r-prudence","A few signs to watch on this site."] },
+    aucun_signal_fort:{ fr:["Aucun signe fort","r-ok","Aucun signe d'arnaque évident. Restez tout de même prudent."], en:["No strong sign","r-ok","No obvious scam sign. Stay careful anyway."] }
   };
   var SEV = { critical:{fr:"Critique",en:"Critical"}, high:{fr:"Fort",en:"High"}, medium:{fr:"Moyen",en:"Medium"}, low:{fr:"Faible",en:"Low"}, info:{fr:"Info",en:"Info"} };
   var STEPS = {
