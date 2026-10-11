@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { isIP } from "node:net";
 import { analyze } from "./analyze.js";
@@ -17,6 +18,10 @@ const scanLimiter = new RateLimiter({
   max: Number(process.env.RATE_MAX ?? 20),
   windowMs: Number(process.env.RATE_WINDOW_MS ?? 10 * 60 * 1000),
 });
+
+/** Logos de la bande defilante : liste fermee, servis depuis public/logos (dist/src -> ../../public). */
+const LOGOS_DIR = new URL("../../public/logos/", import.meta.url);
+const LOGO_FILES = new Set(["ecard.png", "crezzuss.png", "wintg.png", "tchin.png"]);
 
 function isPrivateTarget(url: string): boolean {
   let host: string;
@@ -41,6 +46,25 @@ export function createApp() {
 
     if (req.method === "GET" && url.pathname === "/") {
       res.writeHead(200, { "content-type": "text/html; charset=utf-8", "x-content-type-options": "nosniff" }).end(PAGE_HTML);
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname.startsWith("/logos/")) {
+      const name = url.pathname.slice("/logos/".length);
+      if (!LOGO_FILES.has(name)) {
+        res.writeHead(404, { "content-type": "text/plain" }).end("not found");
+        return;
+      }
+      try {
+        const data = await readFile(new URL(name, LOGOS_DIR));
+        res.writeHead(200, {
+          "content-type": "image/png",
+          "cache-control": "public, max-age=604800",
+          "x-content-type-options": "nosniff",
+        }).end(data);
+      } catch {
+        res.writeHead(404, { "content-type": "text/plain" }).end("not found");
+      }
       return;
     }
 
