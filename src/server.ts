@@ -23,8 +23,11 @@ const scanLimiter = new RateLimiter({
 const LOGOS_DIR = new URL("../../public/logos/", import.meta.url);
 const LOGO_FILES = new Set([
   "ecard.png", "crezzuss.png", "wintg.png", "tchin.png",
-  "logo.svg", "favicon-32.png", "favicon-180.png", "favicon-512.png",
+  "logo.svg", "favicon-32.png", "favicon-180.png", "favicon-512.png", "og.png",
 ]);
+
+const ROBOTS_TXT = "User-agent: *\nAllow: /\nSitemap: https://scan.crezzuss.com/sitemap.xml\n";
+const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://scan.crezzuss.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>\n</urlset>\n`;
 const CONTENT_TYPE: Record<string, string> = { ".png": "image/png", ".svg": "image/svg+xml" };
 
 function isPrivateTarget(url: string): boolean {
@@ -50,6 +53,16 @@ export function createApp() {
 
     if (req.method === "GET" && url.pathname === "/") {
       res.writeHead(200, { "content-type": "text/html; charset=utf-8", "x-content-type-options": "nosniff" }).end(PAGE_HTML);
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/robots.txt") {
+      res.writeHead(200, { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=86400" }).end(ROBOTS_TXT);
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/sitemap.xml") {
+      res.writeHead(200, { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=86400" }).end(SITEMAP_XML);
       return;
     }
 

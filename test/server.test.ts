@@ -51,5 +51,7 @@ test("url manquante : 400", async () => {
 test("chemin inconnu : 404", async () => {
   await withServer(async (base) => {
     assert.equal((await fetch(`${base}/autre`)).status, 404);
+    assert.equal((await fetch(`${base}/robots.txt`)).status, 200);
+    assert.equal((await fetch(`${base}/sitemap.xml`)).status, 200);
   });
 });

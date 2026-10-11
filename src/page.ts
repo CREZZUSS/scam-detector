@@ -14,6 +14,27 @@ export const PAGE_HTML = `<!doctype html>
 <link rel="icon" type="image/svg+xml" href="/logos/logo.svg" />
 <link rel="icon" type="image/png" sizes="32x32" href="/logos/favicon-32.png" />
 <link rel="apple-touch-icon" href="/logos/favicon-180.png" />
+<link rel="canonical" href="https://scan.crezzuss.com/" />
+<meta name="keywords" content="détecteur d'arnaques, scam detector, phishing, hameçonnage, arnaque en ligne, vérifier un lien, BCEAO, Mobile Money, Togo, UEMOA, cybersécurité" />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="CREZZUSS" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="CREZZUSS" />
+<meta property="og:title" content="Détecteur d'arnaques en ligne, gratuit" />
+<meta property="og:description" content="Collez un lien : l'outil détecte en quelques secondes les signes d'arnaque, de phishing ou de virus. Gratuit, sans inscription." />
+<meta property="og:url" content="https://scan.crezzuss.com/" />
+<meta property="og:image" content="https://scan.crezzuss.com/logos/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content="fr_FR" />
+<meta property="og:locale:alternate" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Détecteur d'arnaques en ligne, gratuit" />
+<meta name="twitter:description" content="Collez un lien : arnaque, phishing ou virus ? Réponse en quelques secondes. Gratuit, sans inscription." />
+<meta name="twitter:image" content="https://scan.crezzuss.com/logos/og.png" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Détecteur d'arnaques","url":"https://scan.crezzuss.com/","applicationCategory":"SecurityApplication","operatingSystem":"Web","inLanguage":["fr","en"],"isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"XOF"},"description":"Outil gratuit qui analyse un lien et détecte les signes d'arnaque, de phishing ou de virus.","publisher":{"@type":"Organization","name":"CREZZUSS","url":"https://crezzuss.com"}}
+</script>
 <style>
   :root {
     color-scheme: light;
