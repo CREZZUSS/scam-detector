@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import { isIP } from "node:net";
 import { analyze } from "./analyze.js";
 import { PAGE_HTML } from "./page.js";
+import { clientIp, RateLimiter } from "./ratelimit.js";
 
 /**
  * Petit serveur local : une page ou l'on colle un lien, et l'API `/api/scan?url=` qui renvoie le
@@ -10,6 +11,12 @@ import { PAGE_HTML } from "./page.js";
  * afin de sonder un reseau interne.
  */
 const PORT = Number(process.env.PORT ?? 8099);
+
+/** Par visiteur : 20 analyses par 10 minutes. Surchargageable par variables d'environnement. */
+const scanLimiter = new RateLimiter({
+  max: Number(process.env.RATE_MAX ?? 20),
+  windowMs: Number(process.env.RATE_WINDOW_MS ?? 10 * 60 * 1000),
+});
 
 function isPrivateTarget(url: string): boolean {
   let host: string;
@@ -43,6 +50,13 @@ export function createApp() {
         res.writeHead(status, { "content-type": "application/json; charset=utf-8" }).end(JSON.stringify(body));
       if (!target) return send(400, { error: "Parametre url manquant." });
       if (isPrivateTarget(target)) return send(400, { error: "Adresse locale ou privee refusee." });
+
+      const ip = clientIp(req.headers["x-forwarded-for"], req.socket.remoteAddress ?? undefined);
+      const decision = scanLimiter.check(ip);
+      if (!decision.allowed) {
+        res.setHeader("retry-after", String(decision.retryAfterSeconds));
+        return send(429, { error: `Trop d'analyses. Reessayez dans ${decision.retryAfterSeconds} s.` });
+      }
       try {
         send(200, await analyze(target));
       } catch (error) {
