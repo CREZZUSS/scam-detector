@@ -15,14 +15,30 @@ export interface RenderConfig {
   key: string;
 }
 
-export function renderConfigFromEnv(env: NodeJS.ProcessEnv = process.env): RenderConfig | null {
-  const provider = env.RENDER_PROVIDER?.trim().toLowerCase();
-  const key = env.RENDER_KEY?.trim();
-  if (!key || !provider) return null;
-  if (provider === "scraperapi" || provider === "scrapingbee" || provider === "scrapedo") {
-    return { provider, key };
-  }
+function oneConfig(provider: string | undefined, key: string | undefined): RenderConfig | null {
+  const p = provider?.trim().toLowerCase();
+  const k = key?.trim();
+  if (!k || !p) return null;
+  if (p === "scraperapi" || p === "scrapingbee" || p === "scrapedo") return { provider: p, key: k };
   return null;
+}
+
+export function renderConfigFromEnv(env: NodeJS.ProcessEnv = process.env): RenderConfig | null {
+  return oneConfig(env.RENDER_PROVIDER, env.RENDER_KEY);
+}
+
+/**
+ * Liste des fournisseurs de rendu, dans l'ordre d'essai : le principal
+ * (RENDER_PROVIDER/RENDER_KEY), puis les relais RENDER_PROVIDER_2/RENDER_KEY_2 et _3. Si le principal
+ * echoue ou epuise son quota, on bascule sur le suivant sans intervention.
+ */
+export function renderConfigsFromEnv(env: NodeJS.ProcessEnv = process.env): RenderConfig[] {
+  const list = [
+    oneConfig(env.RENDER_PROVIDER, env.RENDER_KEY),
+    oneConfig(env.RENDER_PROVIDER_2, env.RENDER_KEY_2),
+    oneConfig(env.RENDER_PROVIDER_3, env.RENDER_KEY_3),
+  ];
+  return list.filter((c): c is RenderConfig => c !== null);
 }
 
 /** Construit l'URL d'appel a l'API de rendu pour la cible donnee. La cle reste cote serveur. */

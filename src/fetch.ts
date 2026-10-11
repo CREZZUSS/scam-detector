@@ -1,6 +1,9 @@
-import { renderApiUrl, renderConfigFromEnv, type RenderConfig } from "./render.js";
+import { renderApiUrl, renderConfigsFromEnv, type RenderConfig } from "./render.js";
 import { checkSafeBrowsing } from "./safebrowsing.js";
 import type { SiteSnapshot } from "./types.js";
+
+/** En dessous de ce nombre de caracteres visibles, la page est jugee "non rendue" (contenu en JS). */
+const THIN_TEXT = 400;
 
 /** Liste de suffixes multi-niveaux courants pour deduire le domaine enregistrable. Suffisant pour l'UEMOA. */
 const MULTI_LEVEL_SUFFIXES = new Set([
@@ -34,10 +37,32 @@ export interface FetchOptions {
   fetchImpl?: typeof fetch;
   /** Recherche l'age du domaine via RDAP (reseau). Desactivable pour les tests. */
   lookupDomainAge?: boolean;
-  /** API de rendu JS. Par defaut lue dans l'environnement ; passer null force la lecture directe. */
-  render?: RenderConfig | null;
+  /**
+   * API(s) de rendu JS. Par defaut lues dans l'environnement (principal + relais). `null` ou `[]`
+   * force la lecture directe ; un seul objet ou une liste remplace la configuration d'environnement.
+   */
+  render?: RenderConfig | RenderConfig[] | null;
   /** Cle Google Safe Browsing. Par defaut lue dans l'environnement ; null desactive la detection. */
   safeBrowsingKey?: string | null;
+}
+
+interface FetchResult {
+  status: number;
+  finalUrl: string;
+  html: string;
+  headers: Record<string, string>;
+}
+
+async function fetchOnce(url: string, doFetch: typeof fetch, timeoutMs: number): Promise<FetchResult> {
+  const response = await doFetch(url, {
+    method: "GET",
+    redirect: "follow",
+    headers: { "user-agent": "Mozilla/5.0 (scam-detector; +https://crezzuss.com)", accept: "text/html,*/*" },
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+  const headers: Record<string, string> = {};
+  response.headers.forEach((v, k) => { headers[k.toLowerCase()] = v; });
+  return { status: response.status, finalUrl: response.url || url, html: (await response.text()).slice(0, 2_000_000), headers };
 }
 
 /**
@@ -56,42 +81,37 @@ export async function snapshot(inputUrl: string, options: FetchOptions = {}): Pr
     redirectChain: [], headers: {}, html: "", text: "", domainAgeDays: null,
   };
 
-  // Avec une cle configuree, on delegue le chargement a l'API de rendu (qui execute le JavaScript).
-  const render = options.render === undefined ? renderConfigFromEnv() : options.render;
-  const fetchUrl = render ? renderApiUrl(normalized, render) : normalized;
-  // Le rendu JS via une API externe peut etre lent sur un site lourd ou protege : marge large.
-  const timeoutMs = options.timeoutMs ?? (render ? 55_000 : 15_000);
+  const renders = resolveRenders(options.render);
+  const plainTimeout = options.timeoutMs ?? 15_000;
 
+  // 1) Lecture directe, gratuite. On s'en contente si la page est deja pleine.
+  let result: FetchResult | null = null;
   try {
-    const response = await doFetch(fetchUrl, {
-      method: "GET",
-      redirect: "follow",
-      headers: { "user-agent": "Mozilla/5.0 (scam-detector; +https://crezzuss.com)", accept: "text/html,*/*" },
-      signal: AbortSignal.timeout(timeoutMs),
-    });
-    // Derriere une API de rendu, response.url est l'URL de l'API : on garde l'URL cible d'origine.
-    const finalUrl = render ? normalized : (response.url || normalized);
-    const finalHost = safeHost(finalUrl);
-    const html = (await response.text()).slice(0, 2_000_000);
-    const headers: Record<string, string> = {};
-    response.headers.forEach((v, k) => { headers[k.toLowerCase()] = v; });
-
-    base.reachable = true;
-    base.statusCode = response.status;
-    base.finalUrl = finalUrl;
-    base.host = finalHost;
-    base.registrableDomain = registrableDomain(finalHost);
-    base.tld = finalHost.split(".").pop() ?? "";
-    base.usedHttps = finalUrl.startsWith("https:");
-    base.redirectChain = finalHost === startHost ? [startHost] : [startHost, finalHost];
-    base.headers = headers;
-    base.html = html;
-    base.text = htmlToText(html);
-    base.rendered = Boolean(render);
+    result = await fetchOnce(normalized, doFetch, plainTimeout);
+    applyResult(base, result, startHost, false);
   } catch (error) {
     base.error = error instanceof Error ? error.message : String(error);
-    return base;
   }
+
+  // 2) Rendu JS payant SEULEMENT si necessaire (page quasi vide ou injoignable), avec bascule de
+  //    fournisseur en relais. On economise ainsi les credits sur les sites normaux.
+  const needsRender = renders.length > 0 && (!result || htmlToText(result.html).length < THIN_TEXT);
+  if (needsRender) {
+    const renderTimeout = options.timeoutMs ?? 55_000;
+    for (const cfg of renders) {
+      try {
+        const rendered = await fetchOnce(renderApiUrl(normalized, cfg), doFetch, renderTimeout);
+        // Derriere l'API de rendu, l'URL finale reste la cible d'origine.
+        applyResult(base, { ...rendered, finalUrl: normalized }, startHost, true);
+        delete base.error;
+        if (base.text.length >= THIN_TEXT) break; // rendu utile obtenu
+      } catch {
+        // fournisseur en echec ou quota epuise : on tente le relais suivant
+      }
+    }
+  }
+
+  if (!base.reachable) return base;
 
   if (options.lookupDomainAge !== false) {
     base.domainAgeDays = await domainAgeDays(base.registrableDomain, doFetch, options.timeoutMs ?? 15_000).catch(() => null);
@@ -101,6 +121,30 @@ export async function snapshot(inputUrl: string, options: FetchOptions = {}): Pr
     fetchImpl: doFetch,
   }).catch(() => null);
   return base;
+}
+
+/** Normalise l'option render en liste de fournisseurs (env par defaut). */
+function resolveRenders(opt: FetchOptions["render"]): RenderConfig[] {
+  if (opt === undefined) return renderConfigsFromEnv();
+  if (opt === null) return [];
+  return Array.isArray(opt) ? opt : [opt];
+}
+
+/** Reporte le resultat d'une requete dans l'instantane. */
+function applyResult(base: SiteSnapshot, r: FetchResult, startHost: string, rendered: boolean): void {
+  const finalHost = safeHost(r.finalUrl);
+  base.reachable = true;
+  base.statusCode = r.status;
+  base.finalUrl = r.finalUrl;
+  base.host = finalHost;
+  base.registrableDomain = registrableDomain(finalHost);
+  base.tld = finalHost.split(".").pop() ?? "";
+  base.usedHttps = r.finalUrl.startsWith("https:");
+  base.redirectChain = finalHost === startHost ? [startHost] : [startHost, finalHost];
+  base.headers = r.headers;
+  base.html = r.html;
+  base.text = htmlToText(r.html);
+  base.rendered = rendered;
 }
 
 function safeHost(url: string): string {

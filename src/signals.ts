@@ -12,7 +12,9 @@ const REFERRAL_WORDS = ["parrain", "parrainage", "invitez", "invite", "referral"
 const DEPOSIT_WORDS = ["recharge", "depot", "deposez", "investir", "investissez", "invest", "vip", "forfait", "plan ", "palier"];
 const BONUS_WORDS = ["bonus", "offert", "offerts", "cadeau", "welcome", "bienvenue", "inscription offerte"];
 const WITHDRAW_WORDS = ["retrait", "retirer", "withdraw", "payout", "encaisser"];
-const GUARANTEE_WORDS = ["garanti", "garantie", "sans risque", "risk free", "rendement garanti", "100%", "double"];
+// "garantie" et "100%" seuls sont trop courants (garantie legale, "100% sur mesure") : le drapeau
+// n'est leve que si ces mots coexistent avec un contexte de gains/depot (voir discourseSignal).
+const GUARANTEE_WORDS = ["garanti", "garantie", "sans risque", "risk free", "rendement garanti", "gain garanti", "profit garanti"];
 
 function count(text: string, words: string[]): string[] {
   return words.filter((w) => text.includes(w));
@@ -79,7 +81,8 @@ export function discourseSignal(site: SiteSnapshot): Flag[] {
     flags.push({ code: "deposit_to_earn", severity: "high", title: "Il faut deposer pour gagner",
       detail: `Paliers ou depots pour debloquer des gains (${deposit.slice(0, 3).join(", ")}) : structure typique des arnaques a l'investissement.` });
   }
-  if (guarantee.length) {
+  // Une garantie n'est un signal d'arnaque que couplee a une promesse de gain ou d'investissement.
+  if (guarantee.length && (earn.length || deposit.length)) {
     flags.push({ code: "guaranteed_return", severity: "high", title: "Rendement garanti ou sans risque",
       detail: "Aucun placement legitime ne garantit un gain. Cette promesse est un signal d'alerte majeur." });
   }
