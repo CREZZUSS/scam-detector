@@ -73,7 +73,9 @@ export function discourseSignal(site: SiteSnapshot): Flag[] {
     flags.push({ code: "referral_rewards", severity: "high", title: "Gains lies au parrainage",
       detail: "Recompenser l'invitation de proches est le coeur des systemes pyramidaux : les derniers inscrits paient les premiers." });
   }
-  if (bonus.length) {
+  // "bonus"/"bienvenue" seuls sont courants (offre de bienvenue d'un site legitime) : on ne leve
+  // le drapeau que si le bonus s'accompagne d'un contexte de gains, de parrainage ou de depot.
+  if (bonus.length && (earn.length || referral.length || deposit.length || withdraw.length)) {
     flags.push({ code: "signup_bonus", severity: "medium", title: "Bonus d'inscription",
       detail: `Argent "offert" a l'inscription (${bonus.slice(0, 3).join(", ")}) : appat classique pour pousser au depot ou au parrainage.` });
   }
@@ -114,13 +116,18 @@ export function legalMentionsSignal(site: SiteSnapshot): Flag[] {
   // complet et ce garde-fou ne s'applique plus.
   if (!site.rendered && site.text.length < 400) return [];
   const t = site.text;
+  // L'absence de mentions legales n'est un signal d'arnaque que si le site SOLLICITE de l'argent
+  // (gains, depot, retrait). Beaucoup de sites legitimes mettent leurs mentions sur une autre page :
+  // on ne les accuse pas pour ca.
+  const solicitsMoney = count(t, [...EARN_WORDS, ...DEPOSIT_WORDS, ...WITHDRAW_WORDS]).length > 0;
+  if (!solicitsMoney) return [];
   const hasLegal = ["mentions legales", "rccm", "nif", "politique de confidentialite", "conditions generales", "siege social", "privacy policy", "terms"].some((k) => t.includes(k));
   if (hasLegal) return [];
   return [{
     code: "no_legal_mentions",
     severity: "medium",
     title: "Pas de mentions legales ni d'identite d'entreprise",
-    detail: "Aucune societe identifiee, aucune adresse, aucune politique : on ne sait pas qui est responsable ni qui poursuivre.",
+    detail: "Un site qui sollicite de l'argent sans societe identifiee, sans adresse ni politique : on ne sait pas qui est responsable ni qui poursuivre.",
   }];
 }
 
