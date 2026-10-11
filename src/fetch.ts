@@ -59,7 +59,8 @@ export async function snapshot(inputUrl: string, options: FetchOptions = {}): Pr
   // Avec une cle configuree, on delegue le chargement a l'API de rendu (qui execute le JavaScript).
   const render = options.render === undefined ? renderConfigFromEnv() : options.render;
   const fetchUrl = render ? renderApiUrl(normalized, render) : normalized;
-  const timeoutMs = options.timeoutMs ?? (render ? 30_000 : 15_000);
+  // Le rendu JS via une API externe peut etre lent sur un site lourd ou protege : marge large.
+  const timeoutMs = options.timeoutMs ?? (render ? 55_000 : 15_000);
 
   try {
     const response = await doFetch(fetchUrl, {
