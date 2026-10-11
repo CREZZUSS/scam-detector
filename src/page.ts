@@ -1,6 +1,6 @@
 /**
- * Page servie par le serveur. Design clair et simple, une colonne. Autonome : styles et script
- * inline, logos servis par /logos/. Animations (scan, bande de logos) coupees si
+ * Page servie par le serveur. Bilingue FR/EN (bouton dans l'en-tete, choix memorise). Design clair
+ * une colonne, bande de logos, animation de scan. Autonome, sans CDN. Animations coupees si
  * prefers-reduced-motion.
  */
 export const PAGE_HTML = `<!doctype html>
@@ -8,14 +8,14 @@ export const PAGE_HTML = `<!doctype html>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Détecteur d'arnaques en ligne | CREZZUSS</title>
-<meta name="description" content="Collez le lien d'un site qui promet des gains : l'outil lit ses signaux publics (agrément BCEAO, âge du domaine, parrainage, bonus) et rend un avis. Gratuit, sans inscription." />
+<title data-i18n="title">Détecteur d'arnaques en ligne | CREZZUSS</title>
+<meta name="description" content="Collez le lien d'un site qui promet des gains : l'outil lit ses signaux publics et rend un avis. Gratuit, sans inscription." />
 <meta name="theme-color" content="#f7f8fb" />
 <style>
   :root {
     color-scheme: light;
     --bg:#f7f8fb; --card:#ffffff; --line:#e3e7ef; --ink:#0f172a; --mut:#5b6478;
-    --blue:#2f5bff; --blue-soft:#eaf0ff; --ok:#14945f; --ok-soft:#e5f6ee;
+    --blue:#2f5bff; --ok:#14945f; --ok-soft:#e5f6ee;
     --warn:#b7791f; --warn-soft:#fdf3e1; --bad:#d6334a; --bad-soft:#fdebee;
   }
   * { box-sizing:border-box; }
@@ -24,10 +24,13 @@ export const PAGE_HTML = `<!doctype html>
   a { color:var(--blue); }
   .wrap { max-width:720px; margin:0 auto; padding:0 16px; }
 
-  header { padding:18px 0; }
-  header .wrap { display:flex; align-items:center; justify-content:space-between; }
+  header { padding:16px 0; }
+  header .wrap { display:flex; align-items:center; justify-content:space-between; gap:12px; }
   .brand { font-weight:700; color:var(--ink); text-decoration:none; }
   .brand span { color:var(--mut); font-weight:500; }
+  .lang { display:inline-flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; background:#fff; }
+  .lang button { border:0; background:transparent; padding:5px 12px; font-size:.82rem; font-weight:700; color:var(--mut); cursor:pointer; }
+  .lang button.on { background:var(--blue); color:#fff; }
 
   .hero { text-align:center; padding:40px 0 8px; }
   .hero h1 { font-size:clamp(1.9rem,6vw,2.7rem); line-height:1.15; margin:0 0 12px; letter-spacing:-.02em; }
@@ -41,7 +44,6 @@ export const PAGE_HTML = `<!doctype html>
   form:focus-within { border-color:var(--blue); }
   .hint { color:var(--mut); font-size:.85rem; margin-top:10px; text-align:center; }
 
-  /* Animation de scan */
   #out { margin-top:24px; }
   .panel { background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
   .bar { display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid var(--line); background:#fbfcfe; }
@@ -62,12 +64,10 @@ export const PAGE_HTML = `<!doctype html>
   li.done .st::after { content:""; position:absolute; left:6px; top:3px; width:4px; height:8px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
   @keyframes spin { to { transform:rotate(360deg) } }
 
-  /* Resultat */
   .result { padding:0; }
   .banner { display:flex; align-items:center; gap:16px; padding:20px; border-top:5px solid; }
   .r-danger .banner { background:var(--bad-soft); border-color:var(--bad); }
-  .r-suspect .banner { background:var(--warn-soft); border-color:var(--warn); }
-  .r-prudence .banner { background:var(--warn-soft); border-color:var(--warn); }
+  .r-suspect .banner, .r-prudence .banner { background:var(--warn-soft); border-color:var(--warn); }
   .r-ok .banner { background:var(--ok-soft); border-color:var(--ok); }
   .score { width:68px; height:68px; flex:none; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:1.45rem; background:#fff; }
   .score small { display:block; font-size:.5rem; font-weight:700; letter-spacing:.06em; color:var(--mut); margin-top:-3px; }
@@ -90,7 +90,6 @@ export const PAGE_HTML = `<!doctype html>
   .err { padding:16px 20px; color:var(--bad); }
   @keyframes fade { from { opacity:0; transform:translateY(4px) } to { opacity:1; transform:none } }
 
-  /* Bande de logos */
   .logos { margin:56px 0 0; text-align:center; }
   .logos h2 { font-size:.8rem; letter-spacing:.14em; text-transform:uppercase; color:var(--mut); margin:0 0 18px; font-weight:700; }
   .track-wrap { overflow:hidden; position:relative;
@@ -126,26 +125,32 @@ export const PAGE_HTML = `<!doctype html>
 <body>
 
 <header>
-  <div class="wrap"><a class="brand" href="/">Détecteur d'arnaques <span>par CREZZUSS</span></a></div>
+  <div class="wrap">
+    <a class="brand" href="/"><span data-i18n="brandName">Détecteur d'arnaques</span> <span data-i18n="by">par CREZZUSS</span></a>
+    <div class="lang" role="group" aria-label="Langue / Language">
+      <button type="button" data-lang="fr">FR</button>
+      <button type="button" data-lang="en">EN</button>
+    </div>
+  </div>
 </header>
 
 <main class="wrap">
   <div class="hero">
-    <h1>Ce site est-il une arnaque&nbsp;?</h1>
-    <p>Collez le lien d'un site qui promet de l'argent. On lit ses signaux publics et on vous donne un avis en quelques secondes.</p>
+    <h1 data-i18n="h1">Ce site est-il une arnaque&nbsp;?</h1>
+    <p data-i18n="sub">Collez le lien d'un site qui promet de l'argent. On lit ses signaux publics et on vous donne un avis en quelques secondes.</p>
   </div>
 
   <form id="f">
-    <label for="u" style="position:absolute;left:-9999px">Lien du site à vérifier</label>
-    <input id="u" type="text" inputmode="url" placeholder="Collez un lien, ex. gains-rapides.top" autocomplete="off" required />
-    <button id="b" type="submit">Analyser</button>
+    <label for="u" style="position:absolute;left:-9999px" data-i18n="label">Lien du site à vérifier</label>
+    <input id="u" type="text" inputmode="url" autocomplete="off" required />
+    <button id="b" type="submit" data-i18n="analyze">Analyser</button>
   </form>
-  <p class="hint">Gratuit, sans inscription. Aucun lien n'est conservé.</p>
+  <p class="hint" data-i18n="hint">Gratuit, sans inscription. Aucun lien n'est conservé.</p>
 
   <div id="out" aria-live="polite"></div>
 
-  <section class="logos" aria-label="Nos produits et partenaires">
-    <h2>Nos produits et partenaires</h2>
+  <section class="logos" aria-label="Partenaires">
+    <h2 data-i18n="partners">Nos produits et partenaires</h2>
     <div class="track-wrap">
       <div class="track">
         <img src="/logos/ecard.png" alt="e_Card" />
@@ -160,88 +165,159 @@ export const PAGE_HTML = `<!doctype html>
     </div>
   </section>
 
-
   <div class="cta">
-    <p><strong>Besoin de sécuriser votre site ou vos paiements&nbsp;?</strong><br>CREZZUSS, agence numérique à Lomé.</p>
-    <a href="https://crezzuss.com" target="_blank" rel="noopener">Nous contacter</a>
+    <p><strong data-i18n="ctaTitle">Besoin de sécuriser votre site ou vos paiements&nbsp;?</strong><br><span data-i18n="ctaSub">CREZZUSS, agence numérique à Lomé.</span></p>
+    <a href="https://crezzuss.com" target="_blank" rel="noopener" data-i18n="contact">Nous contacter</a>
   </div>
 </main>
 
 <footer>
   <div class="wrap">
-    <p>Un outil gratuit de <a href="https://crezzuss.com" target="_blank" rel="noopener">CREZZUSS</a>, Lomé, Togo. Code ouvert sur <a href="https://github.com/CREZZUSS/scam-detector" target="_blank" rel="noopener">GitHub</a>.</p>
-    <p>Un verdict n'est pas une preuve et ne remplace pas votre jugement.</p>
+    <p><span data-i18n="footTool">Un outil gratuit de</span> <a href="https://crezzuss.com" target="_blank" rel="noopener">CREZZUSS</a>, Lomé, Togo. <span data-i18n="footOpen">Code ouvert sur</span> <a href="https://github.com/CREZZUSS/scam-detector" target="_blank" rel="noopener">GitHub</a>.</p>
+    <p data-i18n="footDisc">Un verdict n'est pas une preuve et ne remplace pas votre jugement.</p>
   </div>
 </footer>
 
 <script>
-  var VERDICT = {
-    danger:["Danger","r-danger","Plusieurs signaux d'arnaque. Ne versez pas d'argent."],
-    suspect:["Suspect","r-suspect","Des signaux inquiétants. Vérifiez avant tout versement."],
-    prudence:["Prudence","r-prudence","Quelques signaux à surveiller."],
-    aucun_signal_fort:["Aucun signal fort","r-ok","Rien d'alarmant détecté, restez prudent."]
+  var I18N = {
+    title:   { fr:"Détecteur d'arnaques en ligne | CREZZUSS", en:"Online Scam Detector | CREZZUSS" },
+    brandName:{ fr:"Détecteur d'arnaques", en:"Scam Detector" },
+    by:      { fr:"par CREZZUSS", en:"by CREZZUSS" },
+    h1:      { fr:"Ce site est-il une arnaque\\u00a0?", en:"Is this site a scam?" },
+    sub:     { fr:"Collez le lien d'un site qui promet de l'argent. On lit ses signaux publics et on vous donne un avis en quelques secondes.", en:"Paste the link of a site that promises money. We read its public signals and give you a verdict in seconds." },
+    label:   { fr:"Lien du site à vérifier", en:"Link of the site to check" },
+    place:   { fr:"Collez un lien, ex. gains-rapides.top", en:"Paste a link, e.g. quick-cash.top" },
+    analyze: { fr:"Analyser", en:"Analyze" },
+    analyzing:{ fr:"Analyse…", en:"Analyzing…" },
+    hint:    { fr:"Gratuit, sans inscription. Aucun lien n'est conservé.", en:"Free, no sign-up. No link is stored." },
+    partners:{ fr:"Nos produits et partenaires", en:"Our products and partners" },
+    ctaTitle:{ fr:"Besoin de sécuriser votre site ou vos paiements\\u00a0?", en:"Need to secure your website or payments?" },
+    ctaSub:  { fr:"CREZZUSS, agence numérique à Lomé.", en:"CREZZUSS, digital agency in Lomé." },
+    contact: { fr:"Nous contacter", en:"Contact us" },
+    footTool:{ fr:"Un outil gratuit de", en:"A free tool by" },
+    footOpen:{ fr:"Code ouvert sur", en:"Open source on" },
+    footDisc:{ fr:"Un verdict n'est pas une preuve et ne remplace pas votre jugement.", en:"A verdict is not proof and does not replace your judgment." },
+    found:   { fr:"Ce que l'on a relevé", en:"What we found" },
+    none:    { fr:"Aucun signal relevé.", en:"No signal found." },
+    note:    { fr:"Analyse automatique de signaux publics. Un verdict n'est pas une preuve : confronter à la liste officielle BCEAO et au bon sens.",
+               en:"Automated analysis of public signals. A verdict is not proof: cross-check with the official BCEAO list and common sense." },
+    fail:    { fr:"Impossible de joindre le service. Réessayez dans un instant.", en:"Could not reach the service. Please try again shortly." }
   };
-  var SEV = { critical:"Critique", high:"Fort", medium:"Moyen", low:"Faible", info:"Info" };
-  var STEPS = ["Lecture de la page", "Âge du domaine", "Agrément BCEAO", "Promesses de gains et parrainage", "Mentions légales"];
-  var MIN_SCAN_MS = 3200;
+  var VERDICT = {
+    danger:   { fr:["Danger","r-danger","Plusieurs signaux d'arnaque. Ne versez pas d'argent."], en:["Danger","r-danger","Several scam signals. Do not send any money."] },
+    suspect:  { fr:["Suspect","r-suspect","Des signaux inquiétants. Vérifiez avant tout versement."], en:["Suspicious","r-suspect","Worrying signals. Check before paying anything."] },
+    prudence: { fr:["Prudence","r-prudence","Quelques signaux à surveiller."], en:["Caution","r-prudence","A few signals to watch."] },
+    aucun_signal_fort:{ fr:["Aucun signal fort","r-ok","Rien d'alarmant détecté, restez prudent."], en:["No strong signal","r-ok","Nothing alarming found, stay careful."] }
+  };
+  var SEV = { critical:{fr:"Critique",en:"Critical"}, high:{fr:"Fort",en:"High"}, medium:{fr:"Moyen",en:"Medium"}, low:{fr:"Faible",en:"Low"}, info:{fr:"Info",en:"Info"} };
+  var STEPS = {
+    fr:["Lecture de la page","Âge du domaine","Agrément BCEAO","Promesses de gains et parrainage","Mentions légales"],
+    en:["Reading the page","Domain age","BCEAO license","Earnings and referral claims","Legal notice"]
+  };
+  // Traductions des drapeaux, par code. Le texte FR reste celui du serveur.
+  var FLAG_EN = {
+    risky_tld:{t:"Risky domain extension",d:"Often free or very cheap, common on sites built fast then abandoned."},
+    no_https:{t:"No secure connection (HTTPS)",d:"A site asking for money or credentials without HTTPS offers no privacy guarantee."},
+    very_new_domain:{t:"Very new domain",d:"A site under a month old that promises money often vanishes before the first withdrawal."},
+    new_domain:{t:"Recent domain",d:"Less than six months old: be careful, especially if the site asks for money."},
+    earn_and_withdraw:{t:"Promise of earnings to withdraw",d:"The site talks about earning money and withdrawing it."},
+    referral_rewards:{t:"Earnings from referrals",d:"Rewarding you for inviting friends is the core of pyramid schemes: the newest members pay the oldest."},
+    signup_bonus:{t:"Sign-up bonus",d:"Money 'given' at sign-up: a classic bait to push you to deposit or refer."},
+    deposit_to_earn:{t:"You must deposit to earn",d:"Tiers or deposits to unlock earnings: a typical investment-scam structure."},
+    guaranteed_return:{t:"Guaranteed or risk-free return",d:"No legitimate investment guarantees a gain. This promise is a major red flag."},
+    fast_easy_money:{t:"Fast and easy money",d:"Get-rich-quick wording."},
+    not_in_licensed_seed:{t:"No recognised licensed institution",d:"The site asks for money but is not tied to any institution known to the BCEAO list. Cross-check on bceao.int."},
+    no_legal_mentions:{t:"No legal notice or company identity",d:"No identifiable company, address or policy: nobody is accountable."},
+    foreign_template_cjk:{t:"Template with Chinese characters",d:"Interface or back office in Chinese on a French-language site: a sign of a resold scam template."},
+    foreign_template_cyrillic:{t:"Template with Cyrillic characters",d:"Cyrillic text on a French-language site: a possibly imported, hastily rebranded template."},
+    known_scam_kit:{t:"Known earnings-platform template",d:"Template name already seen on watch-ads-and-earn platforms, often fraudulent."},
+    admin_interface_present:{t:"Admin interface detected",d:"The admin template is served here. To check in the code: the API must refuse data without authentication, not just hide the screen."},
+    js_rendered_page:{t:"JavaScript-built page, limited analysis",d:"The content loads via JavaScript; without full rendering, the tool sees only part of the page. The result is mostly about the domain."},
+    unreachable:{t:"Site unreachable",d:"The page did not respond."}
+  };
+
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var lang = "fr";
+  try { var saved = localStorage.getItem("sd.lang"); if (saved === "fr" || saved === "en") lang = saved;
+        else if ((navigator.language||"").toLowerCase().indexOf("en") === 0) lang = "en"; } catch(e) {}
 
   var f = document.getElementById("f"), u = document.getElementById("u"), b = document.getElementById("b"), out = document.getElementById("out");
   function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function host(v){ try { return new URL(/^https?:\\/\\//i.test(v) ? v : "https://" + v).hostname; } catch(e) { return v; } }
+  var lastReport = null;
+
+  function applyLang(){
+    document.documentElement.lang = lang;
+    var nodes = document.querySelectorAll("[data-i18n]");
+    for (var i = 0; i < nodes.length; i++) {
+      var key = nodes[i].getAttribute("data-i18n");
+      if (I18N[key]) nodes[i].innerHTML = I18N[key][lang];
+    }
+    u.placeholder = I18N.place[lang];
+    var btns = document.querySelectorAll(".lang button");
+    for (var j = 0; j < btns.length; j++) btns[j].className = btns[j].getAttribute("data-lang") === lang ? "on" : "";
+    if (lastReport) render(lastReport);
+    try { localStorage.setItem("sd.lang", lang); } catch(e) {}
+  }
 
   function scanPanel(domain){
     var sk = "";
     for (var i = 0; i < 6; i++) sk += '<div class="sk" style="width:' + [92,70,84,55,78,64][i] + '%"></div>';
-    var steps = STEPS.map(function(s, i){ return '<li class="' + (i === 0 ? "run" : "wait") + '"><span class="st"></span>' + s + '</li>'; }).join("");
+    var steps = STEPS[lang].map(function(s, i){ return '<li class="' + (i === 0 ? "run" : "wait") + '"><span class="st"></span>' + s + '</li>'; }).join("");
     return '<div class="panel" id="scan"><div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="addr">' + esc(domain) + '</span></div>' +
       '<div class="page">' + sk + (reduce ? "" : '<div class="laser"></div>') + '</div><ul class="steps">' + steps + '</ul></div>';
   }
-
   function advance(n){
     var lis = out.querySelectorAll("ul.steps li");
     for (var i = 0; i < lis.length; i++) lis[i].className = i < n ? "done" : (i === n ? "run" : "wait");
   }
 
   function render(j){
-    var v = VERDICT[j.verdict] || VERDICT.aucun_signal_fort;
+    lastReport = j;
+    var v = (VERDICT[j.verdict] || VERDICT.aucun_signal_fort)[lang];
     var items = j.flags.map(function(fl, i){
+      var tr = lang === "en" && FLAG_EN[fl.code] ? FLAG_EN[fl.code] : null;
+      if (lang === "en" && !tr && fl.code.indexOf("malicious_") === 0) tr = { t:"Dangerous link flagged by Google", d:"Google Safe Browsing flagged this site (malware or phishing). Do not enter any credentials or download anything." };
+      var title = tr ? tr.t : fl.title;
+      var detail = tr ? tr.d : fl.detail;
       return '<li class="sev-' + fl.severity + '" style="animation-delay:' + (i * 0.07) + 's"><span class="dot"></span>' +
-        '<div><div class="ftitle">' + esc(fl.title) + '<span class="fsev">' + (SEV[fl.severity] || "") + '</span></div>' +
-        '<div class="fdetail">' + esc(fl.detail) + '</div></div></li>';
+        '<div><div class="ftitle">' + esc(title) + '<span class="fsev">' + (SEV[fl.severity] ? SEV[fl.severity][lang] : "") + '</span></div>' +
+        '<div class="fdetail">' + esc(detail) + '</div></div></li>';
     }).join("");
     out.innerHTML = '<div class="panel result ' + v[1] + '">' +
       '<div class="banner"><div class="score">' + j.score + '<small>/100</small></div>' +
       '<div><div class="verdict">' + v[0] + '</div><div class="domain">' + esc(j.registrableDomain) + ' · ' + v[2] + '</div></div></div>' +
-      (items ? '<div class="flags-h">Ce que l\\'on a relevé</div><ul class="flags">' + items + '</ul>' : '<p class="note">Aucun signal relevé.</p>') +
-      '<p class="note">' + esc(j.note) + '</p></div>';
+      (items ? '<div class="flags-h">' + I18N.found[lang] + '</div><ul class="flags">' + items + '</ul>' : '<p class="note">' + I18N.none[lang] + '</p>') +
+      '<p class="note">' + I18N.note[lang] + '</p></div>';
   }
 
+  var btns = document.querySelectorAll(".lang button");
+  for (var k = 0; k < btns.length; k++) btns[k].addEventListener("click", function(){ lang = this.getAttribute("data-lang"); applyLang(); });
+  applyLang();
+
+  var MIN_SCAN_MS = 3200;
   f.addEventListener("submit", function(e){
     e.preventDefault();
     var url = u.value.trim();
     if (!url) return;
-    b.disabled = true;
+    b.disabled = true; b.textContent = I18N.analyzing[lang];
+    lastReport = null;
     out.innerHTML = scanPanel(host(url));
     var started = Date.now(), step = 0;
-    var timer = setInterval(function(){ if (step < STEPS.length - 1) advance(++step); }, MIN_SCAN_MS / STEPS.length);
-
-    var request = fetch("/api/scan?url=" + encodeURIComponent(url))
-      .then(function(r){ return r.json().then(function(j){ return { ok:r.ok, j:j }; }); });
+    var timer = setInterval(function(){ if (step < STEPS[lang].length - 1) advance(++step); }, MIN_SCAN_MS / STEPS[lang].length);
+    var request = fetch("/api/scan?url=" + encodeURIComponent(url)).then(function(r){ return r.json().then(function(j){ return { ok:r.ok, j:j }; }); });
     var wait = new Promise(function(res){ setTimeout(res, reduce ? 0 : Math.max(0, MIN_SCAN_MS - (Date.now() - started))); });
-
     Promise.all([request, wait]).then(function(all){
       var res = all[0];
-      clearInterval(timer);
-      advance(STEPS.length);
+      clearInterval(timer); advance(STEPS[lang].length);
       setTimeout(function(){
-        if (!res.ok) { out.innerHTML = '<div class="panel err">' + esc(res.j.error || "Erreur inconnue.") + '</div>'; return; }
+        if (!res.ok) { out.innerHTML = '<div class="panel err">' + esc(res.j.error || "Error") + '</div>'; return; }
         render(res.j);
       }, reduce ? 0 : 350);
     }).catch(function(){
       clearInterval(timer);
-      out.innerHTML = '<div class="panel err">Impossible de joindre le service. Réessayez dans un instant.</div>';
-    }).finally(function(){ b.disabled = false; });
+      out.innerHTML = '<div class="panel err">' + I18N.fail[lang] + '</div>';
+    }).finally(function(){ b.disabled = false; b.textContent = I18N.analyze[lang]; });
   });
 </script>
 </body>

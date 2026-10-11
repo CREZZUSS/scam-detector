@@ -31,6 +31,8 @@ export interface SiteSnapshot {
   domainAgeDays: number | null;
   /** true si le HTML a ete obtenu via une API de rendu JS (sinon lecture directe). */
   rendered?: boolean;
+  /** Menaces Google Safe Browsing (MALWARE, SOCIAL_ENGINEERING...) ; [] si propre, null si non verifie. */
+  threats?: string[] | null;
   error?: string;
 }
 

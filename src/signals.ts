@@ -164,6 +164,24 @@ export function adminInterfaceSignal(site: SiteSnapshot): Flag[] {
   }];
 }
 
+const THREAT_FR: Record<string, string> = {
+  MALWARE: "diffusion de logiciels malveillants (virus)",
+  SOCIAL_ENGINEERING: "hameçonnage (fausse page pour voler vos identifiants)",
+  UNWANTED_SOFTWARE: "logiciels indésirables",
+  POTENTIALLY_HARMFUL_APPLICATION: "application potentiellement dangereuse",
+};
+
+export function maliciousLinkSignal(site: SiteSnapshot): Flag[] {
+  if (!site.threats || site.threats.length === 0) return [];
+  const kinds = site.threats.map((t) => THREAT_FR[t] ?? t).join(", ");
+  return [{
+    code: "malicious_" + site.threats.join("_").toLowerCase(),
+    severity: "critical",
+    title: "Lien dangereux signalé par Google",
+    detail: `Google Safe Browsing a signalé ce site pour : ${kinds}. N'y entrez aucun identifiant et ne téléchargez rien.`,
+  }];
+}
+
 export function thinPageSignal(site: SiteSnapshot): Flag[] {
   if (!site.reachable || site.rendered || site.text.length >= 400) return [];
   return [{
@@ -176,5 +194,5 @@ export function thinPageSignal(site: SiteSnapshot): Flag[] {
 
 export const ALL_SIGNALS = [
   tldSignal, httpsSignal, domainAgeSignal, discourseSignal, licenseSignal,
-  legalMentionsSignal, foreignTemplateSignal, adminInterfaceSignal, thinPageSignal,
+  legalMentionsSignal, foreignTemplateSignal, adminInterfaceSignal, maliciousLinkSignal, thinPageSignal,
 ];

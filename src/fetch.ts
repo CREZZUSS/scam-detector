@@ -1,4 +1,5 @@
 import { renderApiUrl, renderConfigFromEnv, type RenderConfig } from "./render.js";
+import { checkSafeBrowsing } from "./safebrowsing.js";
 import type { SiteSnapshot } from "./types.js";
 
 /** Liste de suffixes multi-niveaux courants pour deduire le domaine enregistrable. Suffisant pour l'UEMOA. */
@@ -35,6 +36,8 @@ export interface FetchOptions {
   lookupDomainAge?: boolean;
   /** API de rendu JS. Par defaut lue dans l'environnement ; passer null force la lecture directe. */
   render?: RenderConfig | null;
+  /** Cle Google Safe Browsing. Par defaut lue dans l'environnement ; null desactive la detection. */
+  safeBrowsingKey?: string | null;
 }
 
 /**
@@ -92,6 +95,10 @@ export async function snapshot(inputUrl: string, options: FetchOptions = {}): Pr
   if (options.lookupDomainAge !== false) {
     base.domainAgeDays = await domainAgeDays(base.registrableDomain, doFetch, options.timeoutMs ?? 15_000).catch(() => null);
   }
+  base.threats = await checkSafeBrowsing(base.finalUrl, {
+    ...(options.safeBrowsingKey !== undefined ? { key: options.safeBrowsingKey } : {}),
+    fetchImpl: doFetch,
+  }).catch(() => null);
   return base;
 }
 
