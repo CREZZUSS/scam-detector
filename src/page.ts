@@ -239,6 +239,12 @@ export const PAGE_HTML = `<!doctype html>
     unreachable:{t:"Site unreachable",d:"The page did not respond."}
   };
 
+  var MAL_EN = {
+    malicious_social_engineering:{ t:"Phishing · flagged by Google", d:"Fake page imitating a real site (bank, Mobile Money, social network) to steal your passwords, codes or money. Do not enter anything." },
+    malicious_malware:{ t:"Malware (virus) · flagged by Google", d:"This site may install a virus or spyware on your phone or computer. Do not download anything and leave the page." },
+    malicious_unwanted_software:{ t:"Unwanted software · flagged by Google", d:"This site pushes unwanted programs that can disrupt your device or track you." },
+    malicious_potentially_harmful_application:{ t:"Harmful application · flagged by Google", d:"This site offers a potentially harmful app for your device." }
+  };
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var lang = "fr";
   try { var saved = localStorage.getItem("sd.lang"); if (saved === "fr" || saved === "en") lang = saved;
@@ -280,7 +286,7 @@ export const PAGE_HTML = `<!doctype html>
     var v = (VERDICT[j.verdict] || VERDICT.aucun_signal_fort)[lang];
     var items = j.flags.map(function(fl, i){
       var tr = lang === "en" && FLAG_EN[fl.code] ? FLAG_EN[fl.code] : null;
-      if (lang === "en" && !tr && fl.code.indexOf("malicious_") === 0) tr = { t:"Dangerous link flagged by Google", d:"Google Safe Browsing flagged this site (malware or phishing). Do not enter any credentials or download anything." };
+      if (lang === "en" && !tr && fl.code.indexOf("malicious_") === 0) tr = MAL_EN[fl.code] || { t:"Dangerous link · flagged by Google", d:"Google flagged this site as dangerous. Do not enter anything or download anything." };
       var title = tr ? tr.t : fl.title;
       var detail = tr ? tr.d : fl.detail;
       return '<li class="sev-' + fl.severity + '" style="animation-delay:' + (i * 0.07) + 's"><span class="dot"></span>' +

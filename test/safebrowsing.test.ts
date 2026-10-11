@@ -35,5 +35,14 @@ test("signal : menace detectee => drapeau critique", () => {
   const site = { reachable: true, threats: ["SOCIAL_ENGINEERING"] } as unknown as SiteSnapshot;
   const flags = maliciousLinkSignal(site);
   assert.equal(flags[0]?.severity, "critical");
-  assert.ok(flags[0]?.code.startsWith("malicious_"));
+  assert.equal(flags[0]?.code, "malicious_social_engineering");
+  assert.match(flags[0]?.title ?? "", /Hame.onnage/);
+});
+
+test("signal : un drapeau par type de menace, chacun nomme", () => {
+  const site = { reachable: true, threats: ["MALWARE", "SOCIAL_ENGINEERING"] } as unknown as SiteSnapshot;
+  const titles = maliciousLinkSignal(site).map((f) => f.title);
+  assert.equal(titles.length, 2);
+  assert.ok(titles.some((t) => /Virus/.test(t)));
+  assert.ok(titles.some((t) => /phishing/.test(t)));
 });

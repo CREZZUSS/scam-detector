@@ -167,22 +167,37 @@ export function adminInterfaceSignal(site: SiteSnapshot): Flag[] {
   }];
 }
 
-const THREAT_FR: Record<string, string> = {
-  MALWARE: "diffusion de logiciels malveillants (virus)",
-  SOCIAL_ENGINEERING: "hameçonnage (fausse page pour voler vos identifiants)",
-  UNWANTED_SOFTWARE: "logiciels indésirables",
-  POTENTIALLY_HARMFUL_APPLICATION: "application potentiellement dangereuse",
+/** Un type de menace Google -> un drapeau nommé clairement (le type est dans le titre). */
+const THREAT_FLAG: Record<string, { title: string; detail: string }> = {
+  SOCIAL_ENGINEERING: {
+    title: "Hameçonnage (phishing)",
+    detail: "Fausse page qui imite un vrai site (banque, Mobile Money, réseau social) pour voler vos mots de passe, vos codes ou votre argent. N'entrez aucune information.",
+  },
+  MALWARE: {
+    title: "Virus / logiciel malveillant",
+    detail: "Ce site peut installer un virus ou un logiciel espion sur votre téléphone ou votre ordinateur. Ne téléchargez rien et quittez la page.",
+  },
+  UNWANTED_SOFTWARE: {
+    title: "Logiciel indésirable",
+    detail: "Ce site pousse à installer des programmes non désirés qui peuvent gêner votre appareil ou vous pister.",
+  },
+  POTENTIALLY_HARMFUL_APPLICATION: {
+    title: "Application dangereuse",
+    detail: "Ce site propose une application potentiellement nuisible pour votre appareil.",
+  },
 };
 
 export function maliciousLinkSignal(site: SiteSnapshot): Flag[] {
   if (!site.threats || site.threats.length === 0) return [];
-  const kinds = site.threats.map((t) => THREAT_FR[t] ?? t).join(", ");
-  return [{
-    code: "malicious_" + site.threats.join("_").toLowerCase(),
-    severity: "critical",
-    title: "Lien dangereux signalé par Google",
-    detail: `Google Safe Browsing a signalé ce site pour : ${kinds}. N'y entrez aucun identifiant et ne téléchargez rien.`,
-  }];
+  return site.threats.map((t) => {
+    const f = THREAT_FLAG[t];
+    return {
+      code: "malicious_" + t.toLowerCase(),
+      severity: "critical" as const,
+      title: `${f ? f.title : "Lien dangereux"} · signalé par Google`,
+      detail: f ? f.detail : "Google a signalé ce site comme dangereux. N'y entrez rien et ne téléchargez rien.",
+    };
+  });
 }
 
 export function thinPageSignal(site: SiteSnapshot): Flag[] {
