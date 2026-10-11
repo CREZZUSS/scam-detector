@@ -29,6 +29,8 @@ export interface SiteSnapshot {
   text: string;
   /** Renseignements WHOIS/RDAP si disponibles, sinon null (jamais bloquant). */
   domainAgeDays: number | null;
+  /** true si le HTML a ete obtenu via une API de rendu JS (sinon lecture directe). */
+  rendered?: boolean;
   error?: string;
 }
 

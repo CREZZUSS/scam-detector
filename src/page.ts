@@ -63,25 +63,31 @@ export const PAGE_HTML = `<!doctype html>
   @keyframes spin { to { transform:rotate(360deg) } }
 
   /* Resultat */
-  .result { padding:20px; }
-  .head { display:flex; align-items:center; gap:16px; }
-  .score { width:72px; height:72px; flex:none; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:1.5rem; }
-  .verdict { font-size:1.2rem; font-weight:800; }
-  .domain { color:var(--mut); font-size:.9rem; }
-  .r-danger .score, .r-suspect .score { color:var(--bad); background:var(--bad-soft); }
-  .r-suspect .score { color:var(--warn); background:var(--warn-soft); }
-  .r-prudence .score { color:var(--warn); background:var(--warn-soft); }
-  .r-ok .score { color:var(--ok); background:var(--ok-soft); }
-  ul.flags { list-style:none; margin:16px 0 0; padding:0; }
-  ul.flags li { padding:12px 0; border-top:1px solid var(--line); animation:fade .3s ease both; }
-  ul.flags strong { display:block; }
-  ul.flags span { color:var(--mut); font-size:.92rem; }
-  .sev { display:inline-block; font-size:.72rem; font-weight:800; padding:1px 8px; border-radius:999px; margin-right:6px; vertical-align:1px; }
-  .sev-critical, .sev-high { background:var(--bad-soft); color:var(--bad); }
-  .sev-medium { background:var(--warn-soft); color:var(--warn); }
-  .sev-low, .sev-info { background:#eef1f6; color:var(--mut); }
-  .note { color:var(--mut); font-size:.82rem; margin:14px 0 0; }
-  .err { padding:16px 18px; color:var(--bad); }
+  .result { padding:0; }
+  .banner { display:flex; align-items:center; gap:16px; padding:20px; border-top:5px solid; }
+  .r-danger .banner { background:var(--bad-soft); border-color:var(--bad); }
+  .r-suspect .banner { background:var(--warn-soft); border-color:var(--warn); }
+  .r-prudence .banner { background:var(--warn-soft); border-color:var(--warn); }
+  .r-ok .banner { background:var(--ok-soft); border-color:var(--ok); }
+  .score { width:68px; height:68px; flex:none; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:1.45rem; background:#fff; }
+  .score small { display:block; font-size:.5rem; font-weight:700; letter-spacing:.06em; color:var(--mut); margin-top:-3px; }
+  .r-danger .score { color:var(--bad); } .r-suspect .score, .r-prudence .score { color:var(--warn); } .r-ok .score { color:var(--ok); }
+  .verdict { font-size:1.25rem; font-weight:800; line-height:1.2; }
+  .r-danger .verdict { color:var(--bad); } .r-suspect .verdict, .r-prudence .verdict { color:var(--warn); } .r-ok .verdict { color:var(--ok); }
+  .domain { color:var(--mut); font-size:.9rem; margin-top:3px; }
+  .flags-h { padding:16px 20px 2px; font-size:.78rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--mut); }
+  ul.flags { list-style:none; margin:0; padding:0 20px; }
+  ul.flags li { display:flex; gap:12px; padding:14px 0; border-top:1px solid var(--line); animation:fade .3s ease both; }
+  ul.flags li:first-child { border-top:0; }
+  .dot { flex:none; width:10px; height:10px; border-radius:50%; margin-top:7px; }
+  .sev-critical .dot, .sev-high .dot { background:var(--bad); }
+  .sev-medium .dot { background:var(--warn); }
+  .sev-low .dot, .sev-info .dot { background:#c3cad8; }
+  .ftitle { font-weight:700; }
+  .fsev { font-size:.72rem; font-weight:700; color:var(--mut); margin-left:8px; }
+  .fdetail { color:var(--mut); font-size:.92rem; margin-top:2px; }
+  .note { color:var(--mut); font-size:.8rem; padding:12px 20px 20px; border-top:1px solid var(--line); margin:10px 0 0; }
+  .err { padding:16px 20px; color:var(--bad); }
   @keyframes fade { from { opacity:0; transform:translateY(4px) } to { opacity:1; transform:none } }
 
   /* Bande de logos */
@@ -200,12 +206,15 @@ export const PAGE_HTML = `<!doctype html>
   function render(j){
     var v = VERDICT[j.verdict] || VERDICT.aucun_signal_fort;
     var items = j.flags.map(function(fl, i){
-      return '<li style="animation-delay:' + (i * 0.07) + 's"><strong><span class="sev sev-' + fl.severity + '">' + (SEV[fl.severity] || "") + '</span>' + esc(fl.title) + '</strong><span>' + esc(fl.detail) + '</span></li>';
+      return '<li class="sev-' + fl.severity + '" style="animation-delay:' + (i * 0.07) + 's"><span class="dot"></span>' +
+        '<div><div class="ftitle">' + esc(fl.title) + '<span class="fsev">' + (SEV[fl.severity] || "") + '</span></div>' +
+        '<div class="fdetail">' + esc(fl.detail) + '</div></div></li>';
     }).join("");
-    out.innerHTML = '<div class="panel result ' + v[1] + '"><div class="head"><div class="score">' + j.score + '</div>' +
+    out.innerHTML = '<div class="panel result ' + v[1] + '">' +
+      '<div class="banner"><div class="score">' + j.score + '<small>/100</small></div>' +
       '<div><div class="verdict">' + v[0] + '</div><div class="domain">' + esc(j.registrableDomain) + ' · ' + v[2] + '</div></div></div>' +
-      (items ? '<ul class="flags">' + items + '</ul>' : '<p class="note">Aucun signal relevé.</p>') +
-      '<p class="note">Score de risque sur 100. ' + esc(j.note) + '</p></div>';
+      (items ? '<div class="flags-h">Ce que l\\'on a relevé</div><ul class="flags">' + items + '</ul>' : '<p class="note">Aucun signal relevé.</p>') +
+      '<p class="note">' + esc(j.note) + '</p></div>';
   }
 
   f.addEventListener("submit", function(e){

@@ -1,3 +1,4 @@
+import { renderApiUrl, renderConfigFromEnv, type RenderConfig } from "./render.js";
 import type { SiteSnapshot } from "./types.js";
 
 /** Liste de suffixes multi-niveaux courants pour deduire le domaine enregistrable. Suffisant pour l'UEMOA. */
@@ -32,6 +33,8 @@ export interface FetchOptions {
   fetchImpl?: typeof fetch;
   /** Recherche l'age du domaine via RDAP (reseau). Desactivable pour les tests. */
   lookupDomainAge?: boolean;
+  /** API de rendu JS. Par defaut lue dans l'environnement ; passer null force la lecture directe. */
+  render?: RenderConfig | null;
 }
 
 /**
@@ -50,14 +53,20 @@ export async function snapshot(inputUrl: string, options: FetchOptions = {}): Pr
     redirectChain: [], headers: {}, html: "", text: "", domainAgeDays: null,
   };
 
+  // Avec une cle configuree, on delegue le chargement a l'API de rendu (qui execute le JavaScript).
+  const render = options.render === undefined ? renderConfigFromEnv() : options.render;
+  const fetchUrl = render ? renderApiUrl(normalized, render) : normalized;
+  const timeoutMs = options.timeoutMs ?? (render ? 30_000 : 15_000);
+
   try {
-    const response = await doFetch(normalized, {
+    const response = await doFetch(fetchUrl, {
       method: "GET",
       redirect: "follow",
       headers: { "user-agent": "Mozilla/5.0 (scam-detector; +https://crezzuss.com)", accept: "text/html,*/*" },
-      signal: AbortSignal.timeout(options.timeoutMs ?? 15_000),
+      signal: AbortSignal.timeout(timeoutMs),
     });
-    const finalUrl = response.url || normalized;
+    // Derriere une API de rendu, response.url est l'URL de l'API : on garde l'URL cible d'origine.
+    const finalUrl = render ? normalized : (response.url || normalized);
     const finalHost = safeHost(finalUrl);
     const html = (await response.text()).slice(0, 2_000_000);
     const headers: Record<string, string> = {};
@@ -74,6 +83,7 @@ export async function snapshot(inputUrl: string, options: FetchOptions = {}): Pr
     base.headers = headers;
     base.html = html;
     base.text = htmlToText(html);
+    base.rendered = Boolean(render);
   } catch (error) {
     base.error = error instanceof Error ? error.message : String(error);
     return base;

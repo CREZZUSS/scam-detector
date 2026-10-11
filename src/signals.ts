@@ -106,6 +106,10 @@ export function licenseSignal(site: SiteSnapshot): Flag[] {
 
 export function legalMentionsSignal(site: SiteSnapshot): Flag[] {
   if (!site.reachable) return [];
+  // Page quasi vide non rendue (React/Next/Vue sans API de rendu) : on ne peut pas juger du pied de
+  // page, on se tait plutot que d'accuser a tort un vrai site. Avec une API de rendu, le texte est
+  // complet et ce garde-fou ne s'applique plus.
+  if (!site.rendered && site.text.length < 400) return [];
   const t = site.text;
   const hasLegal = ["mentions legales", "rccm", "nif", "politique de confidentialite", "conditions generales", "siege social", "privacy policy", "terms"].some((k) => t.includes(k));
   if (hasLegal) return [];
@@ -160,7 +164,17 @@ export function adminInterfaceSignal(site: SiteSnapshot): Flag[] {
   }];
 }
 
+export function thinPageSignal(site: SiteSnapshot): Flag[] {
+  if (!site.reachable || site.rendered || site.text.length >= 400) return [];
+  return [{
+    code: "js_rendered_page",
+    severity: "info",
+    title: "Page construite en JavaScript, analyse limitée",
+    detail: "Le contenu s'affiche via du JavaScript ; sans rendu complet, l'outil ne voit qu'une partie de la page. Le résultat porte surtout sur le domaine.",
+  }];
+}
+
 export const ALL_SIGNALS = [
   tldSignal, httpsSignal, domainAgeSignal, discourseSignal, licenseSignal,
-  legalMentionsSignal, foreignTemplateSignal, adminInterfaceSignal,
+  legalMentionsSignal, foreignTemplateSignal, adminInterfaceSignal, thinPageSignal,
 ];
