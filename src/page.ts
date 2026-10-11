@@ -34,6 +34,12 @@ export const PAGE_HTML = `<!doctype html>
   .detail { color:var(--mut); font-size:.92rem; }
   .note { color:var(--mut); font-size:.82rem; margin-top:16px; }
   .err { color:var(--bad); }
+  .cta { margin-top:28px; background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:18px 20px; display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  .cta p { margin:0; }
+  .cta .big { font-weight:600; }
+  .cta .small { color:var(--mut); font-size:.88rem; }
+  .cta a { background:#3a6dff; color:#fff; text-decoration:none; font-weight:600; padding:10px 18px; border-radius:10px; white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -46,6 +52,10 @@ export const PAGE_HTML = `<!doctype html>
   </form>
   <div id="out"></div>
   <p class="note">Analyse non intrusive : une seule lecture de la page, aucune connexion, aucune donnee envoyee. Un verdict « danger » invite a la prudence et a verifier sur bceao.int ; il ne remplace pas votre jugement.</p>
+  <div class="cta">
+    <p><span class="big">Besoin de securiser votre site ou vos paiements&nbsp;?</span><br><span class="small">CREZZUSS, agence numerique a Lome. Developpement, paiements et securite.</span></p>
+    <a href="https://crezzuss.com" target="_blank" rel="noopener">Nous contacter</a>
+  </div>
 </div>
 <script>
   var VLABEL = { danger:["DANGER","danger"], suspect:["SUSPECT","suspect"], prudence:["PRUDENCE","prudence"], aucun_signal_fort:["AUCUN SIGNAL FORT","ok"] };
